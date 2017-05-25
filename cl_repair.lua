@@ -1,6 +1,5 @@
-local isRepairman = true
-local inJob = true
-local firstSpawn = true
+local isRepairman = nil
+local inJob = false
 local VehicleTowTruck = GetHashKey('towtruck')
 local VehicleFlatBed = GetHashKey('flatbed')
 local missionsList = {}
@@ -378,7 +377,43 @@ end)
 
 RegisterNetEvent('repairman:missionAlreadyOccuped')
 AddEventHandler('repairman:missionAlreadyOccuped', function ()
-  notifIcon("CHAR_BLANK_ENTRY", 1, "Mecano Info", false, "La mission est déjà prise par quelqu'un d'autre")
+  -- notifIcon("CHAR_BLANK_ENTRY", 1, "Mecano Info", false, "La mission est déjà prise par quelqu'un d'autre")
+  DisplayNotification("La mission est déjà prise par quelqu'un d'autre")
+end)
+
+RegisterNetEvent("repairman:addMeca")
+AddEventHandler('repairman:addMeca', function (text, newRepairman)
+  DisplayNotification(text)
+  if (newRepairman ~= nil) then
+    isRepairman = newRepairman
+  end
+end)
+
+AddEventHandler('playerSpawned', function(spawn)
+  TriggerServerEvent("repairman:isRepairman")
+
+	Citizen.CreateThread(function()
+		while isRepairman == nil do
+			Citizen.Wait(1)
+			RegisterNetEvent('repairman:setRepairman')
+			AddEventHandler('repairman:setRepairman', function(repairman)
+        isRepairman = repairman
+			end)
+		end
+
+    Citizen.Wait(2500)
+
+    for _, c in pairs(GaragesCoords) do
+      local currentBlip = AddBlipForCoord(c.RepairArea.x, c.RepairArea.y, c.RepairArea.z)
+      SetBlipSprite(currentBlip, 446)
+      SetBlipAsShortRange(currentBlip, true)
+      SetBlipColour(currentBlip, 1)
+      BeginTextCommandSetBlipName("STRING")
+      AddTextComponentString("Mécanicien")
+      EndTextCommandSetBlipName(currentBlip)
+      SetBlipAsMissionCreatorBlip(currentBlip, true)
+    end
+  end)
 end)
 
 -- Main Thread
@@ -434,21 +469,6 @@ Citizen.CreateThread(function()
     -- if isRepairman and inJob and (currentMission ~= nil) then
     if isRepairman and inJob then
       trukHandler()
-    end
-
-    if firstSpawn then
-      Citizen.Wait(2500)
-      for _, c in pairs(GaragesCoords) do
-        local currentBlip = AddBlipForCoord(c.RepairArea.x, c.RepairArea.y, c.RepairArea.z)
-        SetBlipSprite(currentBlip, 446)
-        SetBlipAsShortRange(currentBlip, true)
-        SetBlipColour(currentBlip, 1)
-        BeginTextCommandSetBlipName("STRING")
-        AddTextComponentString("Mécanicien")
-        EndTextCommandSetBlipName(currentBlip)
-        SetBlipAsMissionCreatorBlip(currentBlip, true)
-      end
-      firstSpawn = false
     end
 
     if IsControlJustPressed(1, 167) then
