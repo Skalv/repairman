@@ -494,10 +494,7 @@ Citizen.CreateThread(function()
     end
 
     if IsControlJustPressed(1, 167) then
-      -- openMenuGeneral()
-      local doorhash = GetHashKey("prop_pris_door_01_l")
-      --SetStateOfClosestDoorOfType(DoorModelHash, x-coordinate, y-coordinate, z-coordinate, Lock, DoorSwing)
-      SetStateOfClosestDoorOfType(doorhash, -28.0f, -463.0f, 16.0f, 1, 0.0f)z
+      openMenuGeneral()
     end
   end
 end)
