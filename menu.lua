@@ -36,6 +36,18 @@ local repairManMenu = {
   }
 }
 
+local poundMenu = {
+  ['Title'] = "Gestion fourrière",
+  ["SubMenu"] = {
+    ["Title"] = "Gestion fourrière",
+    ["Items"] = {
+      {["Title"] = "Retour", ["ReturnBtn"] = true},
+      {["Title"] = "Mettre la voiture en fourrière", ["Function"] = addVehicleInPound},
+      {["Title"] = "Sortir une voiture de la fourrière", ["Function"] = rmVehicleInPound},
+    }
+  }
+}
+
 function updateMenu(newMenu)
     itemMenuGeneral.Items[1] = newMenu
 end
@@ -53,6 +65,7 @@ itemMenuGeneral = {
     {['Title'] = "Appeler une dépaneuse", ["Function"] = callRepairman},
     {['Title'] = "Demander à enlever le véhicule", ["Function"] = removeVehicle},
     repairManMenu,
+    poundMenu,
   }
 }
 --====================================================================================

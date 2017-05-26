@@ -83,6 +83,18 @@ AddEventHandler("repairman:endMission", function(missionId)
   end
 end)
 
+RegisterServerEvent("repairman:addVehInPound")
+AddEventHandler("repairman:addVehInPound", function(plate)
+  local query = MySQL:executeQuery("UPDATE user_vehicle SET vehicle_state = 'pound' WHERE vehicle_plate = '@plate'",
+  {["@plate"] = plate})
+end)
+
+RegisterServerEvent("repairman:rmVehFromPound")
+AddEventHandler("repairman:rmVehFromPound", function(plate)
+  local query = MySQL:executeQuery("UPDATE user_vehicle SET vehicle_state = 'out' WHERE vehicle_plate = '@plate'",
+  {["@plate"] = plate})
+end)
+
 TriggerEvent('es:addAdminCommand', 'addMeca', 5, function(source, args, user)
   local newMecaId = args[2]
   if (newMecaId ~= nil) then

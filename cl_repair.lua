@@ -12,6 +12,7 @@ local GaragesCoords = {
     ['PriseDeService'] = {x = -1148.4748, y = -2000.0338, z = 13.1803},
     ['RepairArea'] = {x = -1131.28,  y = -2001.58,  z = 13.58, r = 50.0},
     ['SpawnVehicle'] = {x = -1145.58, y = -1977.95, z = 13.1611},
+    ['PoundArea'] = {x = -1138.07, y = -2034.9, z = 13.2015}
   },
 }
 
@@ -48,13 +49,24 @@ local function isNearRepairArea()
 		local ply = GetPlayerPed(-1)
 		local plyCoords = GetEntityCoords(ply, 0)
 		local distance = GetDistanceBetweenCoords(c.RepairArea.x, c.RepairArea.y, c.RepairArea.z, plyCoords["x"], plyCoords["y"], plyCoords["z"], true)
-		-- if(distance < 30) then
-		-- 	DrawMarker(1, c.RepairArea.x, c.RepairArea.y, c.RepairArea.z-1, 0, 0, 0, 0, 0, 0, 2.0, 2.0, 1.5, 0, 0, 255, 155, 0, 0, 2, 0, 0, 0, 0)
-		-- end
 		if(distance < 10) then
 			return true
 		end
 	end
+end
+
+local function isNearPoundArea()
+  for _, c in pairs(GaragesCoords) do
+    local ply = GetPlayerPed(-1)
+    local plyCoords = GetEntityCoords(ply, 0)
+		local distance = GetDistanceBetweenCoords(c.PoundArea.x, c.PoundArea.y, c.PoundArea.z, plyCoords["x"], plyCoords["y"], plyCoords["z"], true)
+    if(distance < 30) then
+			DrawMarker(1, c.PoundArea.x, c.PoundArea.y, c.PoundArea.z-1, 0, 0, 0, 0, 0, 0, 2.0, 2.0, 1.5, 0, 0, 255, 155, 0, 0, 2, 0, 0, 0, 0)
+		end
+    if(distance < 3) then
+			return true
+		end
+  end
 end
 
 local function spawnVehicle(vehicle)
@@ -181,6 +193,19 @@ function toggleCarHood()
       SetVehicleDoorOpen(vehicle, 4, 0, 0)
     end
   end
+end
+
+-- Pound manager
+function addVehicleInPound()
+  -- local carOnBlip = GetClosestVehicle(-1138.07, -2034.9, 13.2015, 3.000, 0, 70)
+  -- SetEntityAsMissionEntity(carOnBlip, true, true)
+  -- local carOnBlipsPlate = GetVehicleNumberPlateText(carOnBlip)
+  -- TriggerServerEvent("repairman:addVehInPound", carOnBlipsPlate)
+  -- Citizen.InvokeNative(0xEA386986E786A54F, Citizen.PointerValueIntInitialized(carOnBlip))
+end
+
+function rmVehicleInPound()
+
 end
 
 -- Mission manager
@@ -466,8 +491,7 @@ Citizen.CreateThread(function()
       end
     end
 
-    -- if isRepairman and inJob and (currentMission ~= nil) then
-    if isRepairman and inJob then
+    if isRepairman and inJob and (currentMission ~= nil) then
       trukHandler()
     end
 
