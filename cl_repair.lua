@@ -205,7 +205,6 @@ function addVehicleInPound()
 end
 
 function rmVehicleInPound()
-
 end
 
 -- Mission manager
@@ -225,7 +224,6 @@ local function acceptMission(data)
 end
 
 local function finishCurrentMission(data)
-  Citizen.Trace("Mission terminé")
   TriggerServerEvent('repairman:endMission', currentMission.id)
   currentMission = nil
   if currentBlip ~= nil then
@@ -496,7 +494,10 @@ Citizen.CreateThread(function()
     end
 
     if IsControlJustPressed(1, 167) then
-      openMenuGeneral()
+      -- openMenuGeneral()
+      local doorhash = GetHashKey("prop_pris_door_01_l")
+      --SetStateOfClosestDoorOfType(DoorModelHash, x-coordinate, y-coordinate, z-coordinate, Lock, DoorSwing)
+      SetStateOfClosestDoorOfType(doorhash, -28.0f, -463.0f, 16.0f, 1, 0.0f)z
     end
   end
 end)

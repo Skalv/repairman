@@ -76,7 +76,6 @@ AddEventHandler("repairman:endMission", function(missionId)
       table.remove(missions, i)
     end
   end
-  print("missions" .. missionId .. " removed")
 
   for _, v in pairs(repairMens) do
     TriggerClientEvent("repairman:updateMissionList", v.sid, missions)
@@ -101,10 +100,8 @@ TriggerEvent('es:addAdminCommand', 'addMeca', 5, function(source, args, user)
     TriggerEvent('es:getPlayerFromId', tonumber(newMecaId), function(newMeca)
       local query = MySQL:executeQuery("SELECT * FROM jobs WHERE job_name = 'Mécanicien'")
       local result = MySQL:getResults(query, {"job_id"}, "job_id")
-      print("ici", result)
       if result and result[1] then
         local jobId = result[1].job_id
-        print("jobid ", jobId)
         local query2 = MySQL:executeQuery("UPDATE users SET job = '@job_id' WHERE identifier = '@identifier'",
         {["@identifier"] = newMeca.identifier, ["@job_id"] = jobId})
 
