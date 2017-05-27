@@ -1,4 +1,4 @@
-local isRepairman = nil
+local isRepairman = true
 local inJob = false
 local VehicleTowTruck = GetHashKey('towtruck')
 local VehicleFlatBed = GetHashKey('flatbed')
@@ -6,6 +6,7 @@ local missionsList = {}
 local currentMission = nil
 local currentBlip = nil
 local showHelpLine = false
+local repairmanMenu = nil
 
 local GaragesCoords = {
   {
@@ -14,6 +15,42 @@ local GaragesCoords = {
     ['SpawnVehicle'] = {x = -1145.58, y = -1977.95, z = 13.1611},
     ['PoundArea'] = {x = -1138.07, y = -2034.9, z = 13.2015}
   },
+}
+
+local menuPattern = {
+  ['Title'] = 'Job menu - Mécanicien',
+  ['Items'] = {
+    {['Title'] = 'Trousse à outils',
+    ['SubMenu'] = {
+      ['Title'] = 'Trousse à outils',
+      ['Items'] = {
+        {['Title'] = 'Retour', ['ReturnBtn'] = true },
+        {['Title'] = "Inspecter la voiture", ["Function"] = getStatusVehicle},
+        {['Title'] = "Réparer rapidement", ["Function"] = repairVehicle},
+        {['Title'] = "Réparer complétement", ["Function"] = fullRepairVehicle},
+        {['Title'] = "Ouvrir/Fermer le capot", ["Function"] = toggleCarHood},
+        {['Title'] = "Afficher/cacher l'aide de la dépaneuse", ["Function"] = toggleHelpLine}
+      }
+    }},
+    {['Title'] = "Missions",
+    ['SubMenu'] = {
+      ['Title'] = "Missions mécanicien",
+      ['Items'] = {
+        {['Title'] = 'Retour', ['ReturnBtn'] = true },
+      }
+    }},
+    {['Title'] = "Fermer"}
+  }
+}
+
+local spawnVehicleMenuSample = {
+  ["Title"] = 'Sortir une dépaneuse',
+  ["Items"] = {
+    {['Title'] = 'Retour', ['ReturnBtn'] = true },
+    {["Title"] = "Dépaneuse avec crochet", ["Function"] = spawnTowtruck},
+    {["Title"] = "Dépaneuse avec plateau", ["Function"] = spawnFlatbed},
+    {['Title'] = 'Fermer'}
+  }
 }
 
 local function isNearRepairGarage()
@@ -69,6 +106,12 @@ local function isNearPoundArea()
   end
 end
 
+function spawnTowtruck()
+  spawnVehicle(VehicleTowTruck)
+end
+function spawnFlatbed()
+  spawnVehicle(VehicleFlatBed)
+end
 local function spawnVehicle(vehicle)
   local car = vehicle
   local ply = GetPlayerPed(-1)
@@ -99,6 +142,9 @@ end
 
 -- Repairman functions --
 function getStatusVehicle()
+  if not isRepairman then
+    return
+  end
   local myPed = GetPlayerPed(-1)
   local vehicle = GetVehicleLookByPlayer(myPed, 3.0)
   local p = GetEntityCoords(vehicle, 0)
@@ -124,6 +170,9 @@ function getStatusVehicle()
 end
 
 function repairVehicle()
+  if not isRepairman then
+    return
+  end
   local myPed = GetPlayerPed(-1)
   local vehicle = GetVehicleLookByPlayer(myPed, 3.0)
   if vehicle ~= 0 then
@@ -146,6 +195,9 @@ function repairVehicle()
 end
 
 function fullRepairVehicle()
+  if not isRepairman then
+    return
+  end
   local myPed = GetPlayerPed(-1)
   local myPos = GetEntityCoords(myPed)
   if not isNearRepairArea() then
@@ -183,6 +235,9 @@ function fullRepairVehicle()
 end
 
 function toggleCarHood()
+  if not isRepairman then
+    return
+  end
   local myPed = GetPlayerPed(-1)
   local vehicle = GetVehicleLookByPlayer(myPed, 3.0)
   if vehicle ~= 0 then
@@ -195,79 +250,10 @@ function toggleCarHood()
   end
 end
 
--- Pound manager
-function addVehicleInPound()
-  -- local carOnBlip = GetClosestVehicle(-1138.07, -2034.9, 13.2015, 3.000, 0, 70)
-  -- SetEntityAsMissionEntity(carOnBlip, true, true)
-  -- local carOnBlipsPlate = GetVehicleNumberPlateText(carOnBlip)
-  -- TriggerServerEvent("repairman:addVehInPound", carOnBlipsPlate)
-  -- Citizen.InvokeNative(0xEA386986E786A54F, Citizen.PointerValueIntInitialized(carOnBlip))
-end
-
-function rmVehicleInPound()
-end
-
--- Mission manager
-local function acceptMission(data)
-  local mission = data.mission
-  currentMission = mission
-  TriggerServerEvent("repairman:acceptMission", mission.id)
-  SetNewWaypoint(mission.posX, mission.posY)
-  currentBlip = AddBlipForCoord(mission.posX, mission.posY, mission.posZ)
-  SetBlipSprite(currentBlip, 446)
-  SetBlipColour(currentBlip, 5)
-  SetBlipAsShortRange(currentBlip, true)
-  BeginTextCommandSetBlipName("STRING")
-  AddTextComponentString("Mission en cours")
-  EndTextCommandSetBlipName(currentBlip)
-  SetBlipAsMissionCreatorBlip(currentBlip, true)
-end
-
-local function finishCurrentMission(data)
-  TriggerServerEvent('repairman:endMission', currentMission.id)
-  currentMission = nil
-  if currentBlip ~= nil then
-    RemoveBlip(currentBlip)
-    currentBlip = nil
-  end
-end
-
-local function updateMissionList(missions)
-  local items = {{['Title'] = 'Retour', ['ReturnBtn'] = true }}
-  for _,m in pairs(missions) do
-    local item = {
-      Title = 'Mission ' .. m.id .. ' [' .. m.type .. ']',
-      mission = m,
-      Function = acceptMission
-    }
-    local mySID = GetPlayerServerId(PlayerId())
-    if m.acceptBy ~= nil then
-      if (m.acceptBy == mySID) then
-        item.Title = item.Title .. ' (En cours)'
-        item.TextColor = {39, 174, 96, 255}
-      else
-        item.Title = item.Title .. ' (Déjà prise)'
-        item.TextColor = {146, 149, 153, 255}
-      end
-    end
-    table.insert(items, item)
-  end
-  if currentMission ~= nil then
-    table.insert(items, {['Title'] = 'Terminer la mission', ['Function'] = finishCurrentMission})
-  end
-  table.insert(items, {['Title'] = 'Fermer'})
-
-  menu = {
-    ['Title'] = 'Mécanicien - liste des missions',
-    ['SubMenu'] = {
-      ['Title'] = 'Missions en cours',
-      ['Items'] = items
-    }
-  }
-  updateMenu(menu)
-end
-
 function toggleHelpLine()
+  if not isRepairman then
+    return
+  end
   showHelpLine = not showHelpLine
 end
 
@@ -393,6 +379,69 @@ local function trukHandler()
   end
 end
 
+-- Pound manager
+function addVehicleInPound()
+  -- local carOnBlip = GetClosestVehicle(-1138.07, -2034.9, 13.2015, 3.000, 0, 70)
+  -- SetEntityAsMissionEntity(carOnBlip, true, true)
+  -- local carOnBlipsPlate = GetVehicleNumberPlateText(carOnBlip)
+  -- TriggerServerEvent("repairman:addVehInPound", carOnBlipsPlate)
+  -- Citizen.InvokeNative(0xEA386986E786A54F, Citizen.PointerValueIntInitialized(carOnBlip))
+end
+
+function rmVehicleInPound()
+end
+
+-- Mission manager
+local function acceptMission(data)
+  local mission = data.mission
+  currentMission = mission
+  TriggerServerEvent("repairman:acceptMission", mission.id)
+  SetNewWaypoint(mission.posX, mission.posY)
+  currentBlip = AddBlipForCoord(mission.posX, mission.posY, mission.posZ)
+  SetBlipSprite(currentBlip, 446)
+  SetBlipColour(currentBlip, 5)
+  SetBlipAsShortRange(currentBlip, true)
+  BeginTextCommandSetBlipName("STRING")
+  AddTextComponentString("Mission en cours")
+  EndTextCommandSetBlipName(currentBlip)
+  SetBlipAsMissionCreatorBlip(currentBlip, true)
+end
+
+local function finishCurrentMission(data)
+  TriggerServerEvent('repairman:endMission', currentMission.id)
+  currentMission = nil
+  if currentBlip ~= nil then
+    RemoveBlip(currentBlip)
+    currentBlip = nil
+  end
+end
+
+local function updateMissionList(missions)
+  local items = {{['Title'] = 'Retour', ['ReturnBtn'] = true }}
+  for _,m in pairs(missions) do
+    local item = {
+      Title = 'Mission ' .. m.id .. ' [' .. m.type .. ']',
+      mission = m,
+      Function = acceptMission
+    }
+    local mySID = GetPlayerServerId(PlayerId())
+    if m.acceptBy ~= nil then
+      if (m.acceptBy == mySID) then
+        item.Title = item.Title .. ' (En cours)'
+        item.TextColor = {39, 174, 96, 255}
+      else
+        item.Title = item.Title .. ' (Déjà prise)'
+        item.TextColor = {146, 149, 153, 255}
+      end
+    end
+    table.insert(items, item)
+  end
+  if currentMission ~= nil then
+    table.insert(items, {['Title'] = 'Terminer la mission', ['Function'] = finishCurrentMission})
+  end
+  repairmanMenu.item.Items[2].SubMenu.Items = items
+end
+
 RegisterNetEvent('repairman:updateMissionList')
 AddEventHandler('repairman:updateMissionList', function (missions)
   updateMissionList(missions)
@@ -409,22 +458,26 @@ AddEventHandler('repairman:addMeca', function (text, newRepairman)
   DisplayNotification(text)
   if (newRepairman ~= nil) then
     isRepairman = newRepairman
+    if isRepairman then
+      -- exports.skMenu:initOtherMenu(repairManMenu)
+    end
   end
 end)
 
+RegisterNetEvent("playerSpawned")
 AddEventHandler('playerSpawned', function(spawn)
+  RegisterNetEvent('repairman:setRepairman')
+  AddEventHandler('repairman:setRepairman', function(repairman)
+    isRepairman = repairman
+  end)
   TriggerServerEvent("repairman:isRepairman")
-
-	Citizen.CreateThread(function()
-		while isRepairman == nil do
-			Citizen.Wait(1)
-			RegisterNetEvent('repairman:setRepairman')
-			AddEventHandler('repairman:setRepairman', function(repairman)
-        isRepairman = repairman
-			end)
-		end
-
+	while isRepairman == nil do
+    Citizen.Wait(1)
+	end
+  if isRepairman then
     Citizen.Wait(2500)
+    repairmanMenu = Menu(menuPattern, 168)
+    repairmanMenu:start()
 
     for _, c in pairs(GaragesCoords) do
       local currentBlip = AddBlipForCoord(c.RepairArea.x, c.RepairArea.y, c.RepairArea.z)
@@ -436,7 +489,7 @@ AddEventHandler('playerSpawned', function(spawn)
       EndTextCommandSetBlipName(currentBlip)
       SetBlipAsMissionCreatorBlip(currentBlip, true)
     end
-  end)
+  end
 end)
 
 -- Main Thread
@@ -472,29 +525,23 @@ Citizen.CreateThread(function()
       if(existingVeh ~= nil) then
         drawTxt("Appyyez sur ~g~E~s~ pour rentrer le vehicule.",0,1,0.5,0.8,0.6,255,255,255,255)
       else
-        drawTxt("Appuyez sur ~g~E~s~ pour sortir la dépaneuse ou ~g~F~s~ pour sortir le plateau.",0,1,0.5,0.8,0.6,255,255,255,255)
+        drawTxt("Appuyez sur ~g~E~s~ pour sortir un vehicule.",0,1,0.5,0.8,0.6,255,255,255,255)
       end
 
-      if IsControlJustPressed(1, 38)  then
+      if IsControlJustPressed(1, 38) then
         if(existingVeh ~= nil) then
           SetEntityAsMissionEntity(existingVeh, true, true)
           Citizen.InvokeNative(0xEA386986E786A54F, Citizen.PointerValueIntInitialized(existingVeh))
           existingVeh = nil
         else
-          spawnVehicle(VehicleTowTruck)
+          -- exports.skMenu:initNewMenu(spawnVehicleMenu)
+          -- exports.skMenu:toggleMenu()
         end
-      end
-      if IsControlJustPressed(1, 23) then
-        spawnVehicle(VehicleFlatBed)
       end
     end
 
     if isRepairman and inJob and (currentMission ~= nil) then
       trukHandler()
-    end
-
-    if IsControlJustPressed(1, 167) then
-      openMenuGeneral()
     end
   end
 end)

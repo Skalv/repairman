@@ -38,6 +38,11 @@ function removeVehicle(data)
   DisplayNotification("Un plateau vient d'être appelée.")
 end
 
+RegisterNetEvent("repairman:callRepairman")
+AddEventHandler("repairman:callRepairman", function(data)
+  callRepairman(data)
+end)
+
 RegisterNetEvent("repairman:missionAccepted")
 AddEventHandler("repairman:missionAccepted", function()
   -- notifIcon("CHAR_BLANK_ENTRY", 1, "Garagiste", false, "Le dépanneur arrive !")
