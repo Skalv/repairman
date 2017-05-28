@@ -380,7 +380,7 @@ local function trukHandler()
 end
 
 local function drawJobStatus()
-  -- DrawRect(X, Y, width, heigh, R, G, B, color[4])
+  -- DrawRect(X, Y, width, heigh, R, G, B, A)
   DrawRect(0.9, 0.9, 0.05, 0.1, 0, 0, 0, 100)
 
   SetTextFont(4)
@@ -544,7 +544,7 @@ Citizen.CreateThread(function()
       if(existingVeh ~= nil) then
         drawTxt("Appyyez sur ~g~E~s~ pour rentrer le vehicule.",0,1,0.5,0.8,0.6,255,255,255,255)
       else
-        drawTxt("Appuyez sur ~g~E~s~ pour sortir un vehicule.",0,1,0.5,0.8,0.6,255,255,255,255)
+        drawTxt("Appuyez sur ~g~E~s~ pour sortir la dépaneuse ou ~g~F~s~ pour sortir le plateau.",0,1,0.5,0.8,0.6,255,255,255,255)
       end
 
       if IsControlJustPressed(1, 38) then
@@ -553,15 +553,19 @@ Citizen.CreateThread(function()
           Citizen.InvokeNative(0xEA386986E786A54F, Citizen.PointerValueIntInitialized(existingVeh))
           existingVeh = nil
         else
+          spawnVehicle(VehicleTowTruck)
           -- exports.skMenu:initNewMenu(spawnVehicleMenu)
           -- exports.skMenu:toggleMenu()
         end
       end
+      if IsControlJustPressed(1, 23) then
+ -        spawnVehicle(VehicleFlatBed)
+ -      end
     end
 
-    -- if isRepairman then
-    --   drawJobStatus()
-    -- end
+    if isRepairman then
+      drawJobStatus()
+    end
 
     if isRepairman and inJob and (currentMission ~= nil) then
       trukHandler()
