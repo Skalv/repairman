@@ -1,4 +1,4 @@
-local isRepairman = true
+local isRepairman = false
 local inJob = false
 local VehicleTowTruck = GetHashKey('towtruck')
 local VehicleFlatBed = GetHashKey('flatbed')
@@ -379,6 +379,21 @@ local function trukHandler()
   end
 end
 
+local function drawJobStatus()
+  -- DrawRect(X, Y, width, heigh, R, G, B, color[4])
+  DrawRect(0.9, 0.9, 0.05, 0.1, 0, 0, 0, 100)
+
+  SetTextFont(4)
+  SetTextScale(0.3, 0.3)
+  SetTextCentre(true)
+  SetTextDropShadow(0, 0, 0, 0, 0)
+  SetTextEdge(0, 0, 0, 0, 0)
+  SetTextColour(255, 255, 255, 255)
+  SetTextEntry("STRING")
+  AddTextComponentString("Mission en attente : ")
+  DrawText(0.9, 0.85)
+end
+
 -- Pound manager
 function addVehicleInPound()
   -- local carOnBlip = GetClosestVehicle(-1138.07, -2034.9, 13.2015, 3.000, 0, 70)
@@ -442,6 +457,11 @@ local function updateMissionList(missions)
   repairmanMenu.item.Items[2].SubMenu.Items = items
 end
 
+local function startMenu()
+  repairmanMenu = Menu(menuPattern, 168)
+  repairmanMenu:start()
+end
+
 RegisterNetEvent('repairman:updateMissionList')
 AddEventHandler('repairman:updateMissionList', function (missions)
   updateMissionList(missions)
@@ -476,8 +496,7 @@ AddEventHandler('playerSpawned', function(spawn)
 	end
   if isRepairman then
     Citizen.Wait(2500)
-    repairmanMenu = Menu(menuPattern, 168)
-    repairmanMenu:start()
+    startMenu()
 
     for _, c in pairs(GaragesCoords) do
       local currentBlip = AddBlipForCoord(c.RepairArea.x, c.RepairArea.y, c.RepairArea.z)
@@ -539,6 +558,10 @@ Citizen.CreateThread(function()
         end
       end
     end
+
+    -- if isRepairman then
+    --   drawJobStatus()
+    -- end
 
     if isRepairman and inJob and (currentMission ~= nil) then
       trukHandler()
