@@ -285,7 +285,7 @@ local function trukHandler()
         local c2 = GetOffsetFromEntityInWorldCoords(towtruck, 0.0, -4.3, -1.2)
         local vehicleAttach = GetEntityAttachedToTowTruck(towtruck)
         local vehicleGrap = GetVehicleInDirection(c1,c2)
-        if ShowLineGrueHelp == true then
+        if showHelpLine == true then
           if vehicleAttach ~= 0 then
             DrawLine(c1.x, c1.y, c1.z, c2.x, c2.y, c2.z, 0, 255, 0, 255)
           elseif vehicleGrap ~= 0 then
@@ -597,10 +597,6 @@ Citizen.CreateThread(function()
     if isRepairman and inJob and (currentMission ~= nil) then
       trukHandler()
     end
-    if IsControlJustPressed(1, 56) then
-      isRepairman = true
-      inJob = true
-      startMenu()
-    end
+    
   end
 end)
