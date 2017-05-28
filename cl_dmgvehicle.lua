@@ -55,6 +55,12 @@ AddEventHandler("repairman:missionFinish", function()
   DisplayNotification("Le dépanneur a terminé.")
 end)
 
+RegisterNetEvent("repairman:alreadyCalled")
+AddEventHandler("repairman:alreadyCalled", function()
+  -- notifIcon("CHAR_BLANK_ENTRY", 1, "Garagiste", false, "Le dépanneur a terminé !")
+  DisplayNotification("Vous avez déjà appelé une dépaneuse !")
+end)
+
 Citizen.CreateThread(function()
   while true do
     Citizen.Wait(0)

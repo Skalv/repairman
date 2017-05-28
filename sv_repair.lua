@@ -35,6 +35,14 @@ end)
 
 RegisterServerEvent("repairman:newMission")
 AddEventHandler("repairman:newMission", function(posX, posY, posZ, type)
+  if #missions > 0 then
+    for _,v in pairs(missions) do
+      if (v.playerId == source) then
+        TriggerClientEvent("repairman:alreadyCalled", source)
+        return
+      end
+    end
+  end
   missionId = missionId + 1
   local newMission = {
     ["id"] = missionId,
@@ -64,6 +72,9 @@ AddEventHandler("repairman:acceptMission", function(missionId)
   end
 
   for _, v in pairs(repairMens) do
+    -- if v.sid == source then
+    --   repairMens[i].inMission = true
+    -- end
     TriggerClientEvent("repairman:updateMissionList", v.sid, missions)
   end
 end)
