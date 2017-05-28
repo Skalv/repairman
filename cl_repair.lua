@@ -1,4 +1,4 @@
-local isRepairman = false
+local isRepairman = nil
 local inJob = false
 local VehicleTowTruck = GetHashKey('towtruck')
 local VehicleFlatBed = GetHashKey('flatbed')
@@ -559,13 +559,13 @@ Citizen.CreateThread(function()
         end
       end
       if IsControlJustPressed(1, 23) then
- -        spawnVehicle(VehicleFlatBed)
- -      end
+         spawnVehicle(VehicleFlatBed)
+      end
     end
 
-    if isRepairman then
-      drawJobStatus()
-    end
+    -- if isRepairman then
+    --   drawJobStatus()
+    -- end
 
     if isRepairman and inJob and (currentMission ~= nil) then
       trukHandler()
