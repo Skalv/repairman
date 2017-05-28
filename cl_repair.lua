@@ -25,11 +25,11 @@ local menuPattern = {
       ['Title'] = 'Trousse à outils',
       ['Items'] = {
         {['Title'] = 'Retour', ['ReturnBtn'] = true },
-        {['Title'] = "Inspecter la voiture", ["Function"] = getStatusVehicle},
-        {['Title'] = "Réparer rapidement", ["Function"] = repairVehicle},
-        {['Title'] = "Réparer complétement", ["Function"] = fullRepairVehicle},
-        {['Title'] = "Ouvrir/Fermer le capot", ["Function"] = toggleCarHood},
-        {['Title'] = "Afficher/cacher l'aide de la dépaneuse", ["Function"] = toggleHelpLine}
+        {['Title'] = "Inspecter la voiture", ["Event"] = "repairman:getStatusVehicle"},
+        {['Title'] = "Réparer rapidement", ["Event"] = "repairman:repairVehicle"},
+        {['Title'] = "Réparer complétement", ["Event"] = "repairman:fullRepairVehicle"},
+        {['Title'] = "Ouvrir/Fermer le capot", ["Event"] = "repairman:toggleCarHood"},
+        {['Title'] = "Afficher/cacher l'aide de la dépaneuse", ["Event"] = "repairman:toggleHelpLine"}
       }
     }},
     {['Title'] = "Missions",
@@ -165,7 +165,7 @@ function getStatusVehicle()
     end
     -- end
   else
-    DrawMissionText("~r~Placer vous devant un véhicule")
+    DrawMissionText("~r~Placer vous devant un véhicule", 8000)
   end
 end
 
@@ -484,6 +484,27 @@ AddEventHandler('repairman:addMeca', function (text, newRepairman)
   end
 end)
 
+RegisterNetEvent("repairman:getStatusVehicle")
+AddEventHandler('repairman:getStatusVehicle', function ()
+  getStatusVehicle()
+end)
+RegisterNetEvent("repairman:repairVehicle")
+AddEventHandler('repairman:repairVehicle', function ()
+  repairVehicle()
+end)
+RegisterNetEvent("repairman:fullRepairVehicle")
+AddEventHandler('repairman:fullRepairVehicle', function ()
+  fullRepairVehicle()
+end)
+RegisterNetEvent("repairman:toggleCarHood")
+AddEventHandler('repairman:toggleCarHood', function ()
+  toggleCarHood()
+end)
+RegisterNetEvent("repairman:toggleHelpLine")
+AddEventHandler('repairman:toggleHelpLine', function ()
+  toggleHelpLine()
+end)
+
 RegisterNetEvent("playerSpawned")
 AddEventHandler('playerSpawned', function(spawn)
   RegisterNetEvent('repairman:setRepairman')
@@ -569,6 +590,11 @@ Citizen.CreateThread(function()
 
     if isRepairman and inJob and (currentMission ~= nil) then
       trukHandler()
+    end
+    if IsControlJustPressed(1, 56) then
+      isRepairman = true
+      inJob = true
+      startMenu()
     end
   end
 end)
