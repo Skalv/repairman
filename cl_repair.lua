@@ -150,20 +150,19 @@ function getStatusVehicle()
   local p = GetEntityCoords(vehicle, 0)
   local h = GetEntityHeading(vehicle)
   if vehicle ~= 0 then
-    local scenario = 'PROP_HUMAN_BUM_SHOPPING_CART'
-    local pos = GetOffsetFromEntityInWorldCoords(myPed, 0.0, 0.2, 0.0)
-    TaskStartScenarioAtPosition(myPed, scenario, pos.x, pos.y, pos.z, 180.0, 8000, 1, 0)
-    Citizen.Wait(8000)
-    ClearPedTasks(myPed)
-    local engineHealth = GetVehicleEngineHealth(vehicle)
-    if engineHealth >= 950 then
-      DrawMissionText('~g~Aucun probleme',8000)
-    elseif engineHealth >= 0 then
-      DrawMissionText('~o~Le véhicule est endommager, mais il est réparable sur place',8000)
-    else
-      DrawMissionText("~r~Véhicule HS, il doit etre rapatrié dans un garage pour réparation",8000)
-    end
-    -- end
+    Citizen.CreateThread(function()
+      TaskStartScenarioInPlace(myPed, 'PROP_HUMAN_BUM_SHOPPING_CART', 0, true)
+      Citizen.Wait(8000)
+      ClearPedTasks(myPed)
+      local engineHealth = GetVehicleEngineHealth(vehicle)
+      if engineHealth >= 950 then
+        DrawMissionText('~g~Aucun probleme',8000)
+      elseif engineHealth >= 0 then
+        DrawMissionText('~o~Le véhicule est endommager, mais il est réparable sur place',8000)
+      else
+        DrawMissionText("~r~Véhicule HS, il doit etre rapatrié dans un garage pour réparation",8000)
+      end
+    end)
   else
     DrawMissionText("~r~Placer vous devant un véhicule", 8000)
   end
@@ -176,19 +175,22 @@ function repairVehicle()
   local myPed = GetPlayerPed(-1)
   local vehicle = GetVehicleLookByPlayer(myPed, 3.0)
   if vehicle ~= 0 then
-    local scenario = 'WORLD_HUMAN_VEHICLE_MECHANIC'
-    local pos = GetOffsetFromEntityInWorldCoords(myPed, 0.0, 0.2, 0.0)
-    TaskStartScenarioAtPosition(myPed, scenario, pos.x, pos.y, pos.z, 0.0, 8000, 1, 0)
-    Citizen.Wait(8000)
-    ClearPedTasks(myPed)
-    local engineHealth = GetVehicleEngineHealth(vehicle)
-    if engineHealth >= 0 then
-      SetVehicleEngineHealth(vehicle, 1000.0)
-      SetVehicleEngineOn(vehicle, 0, 0, 0)
-      DrawMissionText("~g~Le véhicule a subit une réparation d'apoint", 5000)
-    else
-      DrawMissionText("~r~Le véhicule ne peut etre réparer sur place", 5000)
-    end
+    Citizen.CreateThread(function()
+      local scenario = 'WORLD_HUMAN_VEHICLE_MECHANIC'
+      local pos = GetEntityCoords(myPed, 1)
+      local h = GetEntityHeading(myPed)
+      TaskStartScenarioAtPosition(myPed, scenario, pos.x, pos.y, pos.z, h-180, 0, 0, 1)
+      Citizen.Wait(15000)
+      ClearPedTasks(myPed)
+      local engineHealth = GetVehicleEngineHealth(vehicle)
+      if engineHealth >= 0 then
+        SetVehicleEngineHealth(vehicle, 1000.0)
+        SetVehicleEngineOn(vehicle, 0, 0, 0)
+        DrawMissionText("~g~Le véhicule a subit une réparation d'apoint", 5000)
+      else
+        DrawMissionText("~r~Le véhicule ne peut etre réparer sur place", 5000)
+      end
+    end)
   else
     DrawMissionText("~r~Placer vous devant un véhicule", 5000)
   end
@@ -206,29 +208,33 @@ function fullRepairVehicle()
   end
   local vehicle = GetVehicleLookByPlayer(myPed, 3.0)
   if vehicle ~= 0 then
-    local scenario = 'WORLD_HUMAN_VEHICLE_MECHANIC'
-    local pos = GetOffsetFromEntityInWorldCoords(myPed, 0.0, 0.2, 0.0)
-    TaskStartScenarioAtPosition(myPed, scenario, pos.x, pos.y, pos.z, 0.0, 160000, 1, 0)
-    local value = GetVehicleBodyHealth(vehicle)
+    Citizen.CreateThread(function()
+      local scenario = 'WORLD_HUMAN_VEHICLE_MECHANIC'
+      local pos = GetEntityCoords(myPed, 1)
+      local h = GetEntityHeading(myPed)
+      TaskStartScenarioAtPosition(myPed, scenario, pos.x, pos.y, pos.z, h-180, 0, 0, 1)
+      local value = GetVehicleBodyHealth(vehicle)
 
-    while( value < 999.9 ) do
-      value = GetVehicleBodyHealth(vehicle)
-      SetVehicleBodyHealth(vehicle, value + 1.0)
-      DrawMissionText('Réparation en cours ~b~' .. math.floor(value) .. '/1000', 125)
-      Citizen.Wait(125)
-    end
-    Citizen.Wait(250)
-    ClearPedTasks(myPed)
-    SetVehicleBodyHealth(vehicle, 1000.0)
-    SetVehicleEngineHealth(vehicle, 1000.0)
-    SetEntityHealth(vehicle,1000)
-    SetVehiclePetrolTankHealth(vehicle,1000.0)
-    SetVehicleEngineOn(vehicle, 0, 0, 0)
-    SetVehicleBodyHealth(vehicle, 1000.0)
-    SetVehicleFixed(vehicle)
-    SetVehicleDeformationFixed(vehicle)
-    SetVehicleUndriveable(vehicle, false)
-    DrawMissionText('~g~Le véhicule est comme neuf', 5000)
+      while( value < 999.9 ) do
+        value = GetVehicleBodyHealth(vehicle)
+        SetVehicleBodyHealth(vehicle, value + 1.0)
+        DrawMissionText('Réparation en cours ~b~' .. math.floor(value) .. '/1000', 125)
+        Citizen.Wait(125)
+      end
+
+      Citizen.Wait(250)
+      ClearPedTasks(myPed)
+      SetVehicleBodyHealth(vehicle, 1000.0)
+      SetVehicleEngineHealth(vehicle, 1000.0)
+      SetEntityHealth(vehicle,1000)
+      SetVehiclePetrolTankHealth(vehicle,1000.0)
+      SetVehicleEngineOn(vehicle, 0, 0, 0)
+      SetVehicleBodyHealth(vehicle, 1000.0)
+      SetVehicleFixed(vehicle)
+      SetVehicleDeformationFixed(vehicle)
+      SetVehicleUndriveable(vehicle, false)
+      DrawMissionText('~g~Le véhicule est comme neuf', 5000)
+    end)
   else
     DrawMissionText("~r~Placer vous devant un véhicule", 5000)
   end
