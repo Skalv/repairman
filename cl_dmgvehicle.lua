@@ -43,6 +43,16 @@ AddEventHandler("repairman:callRepairman", function(data)
   callRepairman(data)
 end)
 
+RegisterNetEvent("repairman:noRepairman")
+AddEventHandler("repairman:noRepairman", function(data)
+  notifIcon("CHAR_BLANK_ENTRY", 1, "Garagiste", false, "Le garage est actuellement fermé.\nMerci de rappeler plus tard.")
+end)
+
+RegisterNetEvent("repairman:noAvailableRM")
+AddEventHandler("repairman:noAvailableRM", function(data)
+  notifIcon("CHAR_BLANK_ENTRY", 1, "Garagiste", false, "Tous nos dépanneurs sont occupés.\nMerci de patienter.")
+end)
+
 RegisterNetEvent("repairman:missionAccepted")
 AddEventHandler("repairman:missionAccepted", function()
   notifIcon("CHAR_BLANK_ENTRY", 1, "Garagiste", false, "Le dépanneur arrive !")
@@ -57,7 +67,7 @@ end)
 
 RegisterNetEvent("repairman:alreadyCalled")
 AddEventHandler("repairman:alreadyCalled", function()
-  notifIcon("CHAR_BLANK_ENTRY", 1, "Garagiste", false, "Le dépanneur a terminé !")
+  notifIcon("CHAR_BLANK_ENTRY", 1, "Garagiste", false, "Vous avez déjà appelé une dépaneuse !")
   -- DisplayNotification("Vous avez déjà appelé une dépaneuse !")
 end)
 

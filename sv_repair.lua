@@ -43,6 +43,7 @@ AddEventHandler("repairman:newMission", function(posX, posY, posZ, type)
       end
     end
   end
+  local availableRM = false
   missionId = missionId + 1
   local newMission = {
     ["id"] = missionId,
@@ -54,8 +55,20 @@ AddEventHandler("repairman:newMission", function(posX, posY, posZ, type)
     ["acceptBy"] = nil
   }
   table.insert(missions, newMission)
+  -- No repairman in service
+  if #repairMens == 0 then
+    TriggerClientEvent("repairman:noRepairman", source)
+  end
+  -- Trigger to all repairman
   for _, v in pairs(repairMens) do
     TriggerClientEvent("repairman:updateMissionList", v.sid, missions)
+    if v.inMission == true then
+      availableRM = true
+    end
+  end
+  -- If no repairman available
+  if availableRM == false and #repairMens > 0 then
+    TriggerClientEvent("repairman:noAvailableRM", source)
   end
 end)
 
@@ -72,9 +85,9 @@ AddEventHandler("repairman:acceptMission", function(missionId)
   end
 
   for _, v in pairs(repairMens) do
-    -- if v.sid == source then
-    --   repairMens[i].inMission = true
-    -- end
+    if v.sid == source then
+      repairMens[_].inMission = true
+    end
     TriggerClientEvent("repairman:updateMissionList", v.sid, missions)
   end
 end)
@@ -89,6 +102,9 @@ AddEventHandler("repairman:endMission", function(missionId)
   end
 
   for _, v in pairs(repairMens) do
+    if v.sid == source then
+      repairMens[_].inMission = false
+    end
     TriggerClientEvent("repairman:updateMissionList", v.sid, missions)
   end
 end)
