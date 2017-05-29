@@ -7,6 +7,7 @@ local currentMission = nil
 local currentBlip = nil
 local showHelpLine = false
 local repairmanMenu = nil
+local spawnVehMenu = nil
 local totalMissions = 0
 
 local GaragesCoords = {
@@ -26,7 +27,7 @@ local menuPattern = {
       ['Title'] = 'Trousse à outils',
       ['Items'] = {
         {['Title'] = 'Retour', ['ReturnBtn'] = true },
-        {['Title'] = "Inspecter la voiture", ["Event"] = "repairman:getStatusVehicle"},
+        {['Title'] = "Inspecter la voiture", ["EventEvent"] = "repairman:getStatusVehicle"},
         {['Title'] = "Réparer rapidement", ["Event"] = "repairman:repairVehicle"},
         {['Title'] = "Réparer complétement", ["Event"] = "repairman:fullRepairVehicle"},
         {['Title'] = "Ouvrir/Fermer le capot", ["Event"] = "repairman:toggleCarHood"},
@@ -45,12 +46,13 @@ local menuPattern = {
   }
 }
 
-local spawnVehicleMenuSample = {
-  ["Title"] = 'Sortir une dépaneuse',
+local spawnVehMenuPattern = {
+  ["Title"] = 'Véhicule mécanicien',
   ["Items"] = {
     {['Title'] = 'Retour', ['ReturnBtn'] = true },
-    {["Title"] = "Dépaneuse avec crochet", ["Function"] = spawnTowtruck},
-    {["Title"] = "Dépaneuse avec plateau", ["Function"] = spawnFlatbed},
+    {["Title"] = "Rentrer le vehicule", ["Event"] = "repairman:deleteVeh"},
+    {["Title"] = "Sortir crochet", ["Event"] = "repairman:spawnTowtruck"},
+    {["Title"] = "Sortir plateau", ["Event"] = "repairman:spawnFlatbed"},
     {['Title'] = 'Fermer'}
   }
 }
@@ -108,12 +110,6 @@ local function isNearPoundArea()
   end
 end
 
-function spawnTowtruck()
-  spawnVehicle(VehicleTowTruck)
-end
-function spawnFlatbed()
-  spawnVehicle(VehicleFlatBed)
-end
 local function spawnVehicle(vehicle)
   local car = vehicle
   local ply = GetPlayerPed(-1)
@@ -496,6 +492,11 @@ local function startMenu()
   repairmanMenu:start()
 end
 
+local function startSpawnVehMenu()
+  spawnVehMenu = Menu(spawnVehMenuPattern)
+  spawnVehMenu:start()
+end
+
 RegisterNetEvent('repairman:updateMissionList')
 AddEventHandler('repairman:updateMissionList', function (missions)
   updateMissionList(missions)
@@ -541,6 +542,23 @@ end)
 RegisterNetEvent("repairman:toggleHelpLine")
 AddEventHandler('repairman:toggleHelpLine', function ()
   toggleHelpLine()
+end)
+
+RegisterNetEvent("repairman:spawnTowtruck")
+AddEventHandler("repairman:spawnTowtruck", function()
+  spawnVehicle(VehicleTowTruck)
+end)
+RegisterNetEvent("repairman:spawnFlatbed")
+AddEventHandler("repairman:spawnFlatbed", function()
+  spawnVehicle(VehicleFlatBed)
+end)
+RegisterNetEvent("repairman:deleteVeh")
+AddEventHandler("repairman:deleteVeh", function()
+  if(existingVeh ~= nil) then
+    SetEntityAsMissionEntity(existingVeh, true, true)
+    Citizen.InvokeNative(0xEA386986E786A54F, Citizen.PointerValueIntInitialized(existingVeh))
+    existingVeh = nil
+  end
 end)
 
 RegisterNetEvent("playerSpawned")
@@ -602,32 +620,16 @@ Citizen.CreateThread(function()
     end
 
     if isRepairman and inJob and isNearSpawnVehicle() then
-      if(existingVeh ~= nil) then
-        drawTxt("Appyyez sur ~g~E~s~ ou ~g~F~s~ pour rentrer le vehicule.",0,1,0.5,0.8,0.6,255,255,255,255)
-      else
-        drawTxt("Appuyez sur ~g~E~s~ pour sortir la dépaneuse ou ~g~F~s~ pour sortir le plateau.",0,1,0.5,0.8,0.6,255,255,255,255)
-      end
+      drawTxt("Appuyez sur ~g~E~s~ pour ouvrir le menu vehicule.",0,1,0.5,0.8,0.6,255,255,255,255)
 
       if IsControlJustPressed(1, 38) then
-        if(existingVeh ~= nil) then
-          SetEntityAsMissionEntity(existingVeh, true, true)
-          Citizen.InvokeNative(0xEA386986E786A54F, Citizen.PointerValueIntInitialized(existingVeh))
-          existingVeh = nil
-        else
-          spawnVehicle(VehicleTowTruck)
-          -- exports.skMenu:initNewMenu(spawnVehicleMenu)
-          -- exports.skMenu:toggleMenu()
+        if spawnVehMenu == nil then
+          startSpawnVehMenu()
         end
-      end
-      if IsControlJustPressed(1, 23) then
-        if(existingVeh ~= nil) then
-          SetEntityAsMissionEntity(existingVeh, true, true)
-          Citizen.InvokeNative(0xEA386986E786A54F, Citizen.PointerValueIntInitialized(existingVeh))
-          existingVeh = nil
+        if spawnVehMenu.isOpen then
+          spawnVehMenu:close()
         else
-          spawnVehicle(VehicleFlatBed)
-          -- exports.skMenu:initNewMenu(spawnVehicleMenu)
-          -- exports.skMenu:toggleMenu()
+          spawnVehMenu:open()
         end
       end
     end
@@ -640,5 +642,6 @@ Citizen.CreateThread(function()
       trukHandler()
     end
 
+    
   end
 end)

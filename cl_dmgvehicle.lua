@@ -28,6 +28,7 @@ function callRepairman(data)
   local myPed = GetPlayerPed(-1)
   local myCoord = GetEntityCoords(myPed)
   TriggerServerEvent('repairman:newMission', myCoord.x, myCoord.y, myCoord.z, 'vehicule en panne')
+  --notifIcon("CHAR_BLANK_ENTRY", 1, "Garagiste", false, "Une dépaneuse vient d'être appelée.")
   DisplayNotification("Une dépaneuse vient d'être appelée.")
 end
 

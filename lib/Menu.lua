@@ -62,7 +62,6 @@ function initText(textColor, font, scale)
 end
 
 function Menu:start()
-  Citizen.Trace("Start")
   Citizen.CreateThread(function()
     while true do
       Citizen.Wait(1)

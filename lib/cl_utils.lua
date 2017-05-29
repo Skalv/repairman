@@ -49,7 +49,7 @@ end
 
 function notifIcon(icon, type, sender, title, text)
 	Citizen.CreateThread(function()
-    Wait(1)
+    Citizen.Wait(1)
     SetNotificationTextEntry("STRING");
     if TEXT[text] ~= nil then
       text = TEXT[text]
