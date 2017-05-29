@@ -272,12 +272,13 @@ function unlockCar()
   local myPed = GetPlayerPed(-1)
   local vehicle = GetVehicleLookByPlayer(myPed, 3.0)
   if vehicle ~= 0 then
-    local CarHoodOpen = GetVehicleDoorAngleRatio(vehicle, 0) > 0.5
-    if CarHoodOpen then
-      SetVehicleDoorShut(vehicle, 0, 0, 0)
-    else
-      SetVehicleDoorOpen(vehicle, 0, 0, 0)
-    end
+    Citizen.CreateThread(function()
+    	TaskStartScenarioInPlace(GetPlayerPed(-1), "WORLD_HUMAN_WELDING", 0, true)
+    	Citizen.Wait(20000)
+      SetVehicleDoorsLocked(vehicle, 1)
+    	ClearPedTasksImmediately(GetPlayerPed(-1))
+    	DisplayNotification("Le vehicule est maintenant ~g~ouvert~w~.")
+  	end)
   end
 end
 
@@ -645,7 +646,7 @@ Citizen.CreateThread(function()
       end
     end
 
-    if isRepairman then
+    if isRepairman and inJob then
       drawJobStatus()
     end
 
