@@ -51,9 +51,6 @@ function notifIcon(icon, type, sender, title, text)
 	Citizen.CreateThread(function()
     Citizen.Wait(1)
     SetNotificationTextEntry("STRING");
-    if TEXT[text] ~= nil then
-      text = TEXT[text]
-    end
     AddTextComponentString(text);
     SetNotificationMessage(icon, icon, true, type, sender, title, text);
     DrawNotification(false, true);

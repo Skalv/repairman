@@ -1,6 +1,7 @@
 local isRepairman = nil
 local inJob = false
 local VehicleTowTruck = GetHashKey('towtruck')
+local VehicleTowTruck2 = GetHashKey('towtruck2')
 local VehicleFlatBed = GetHashKey('flatbed')
 local missionsList = {}
 local currentMission = nil
@@ -52,6 +53,7 @@ local spawnVehMenuPattern = {
     {['Title'] = 'Retour', ['ReturnBtn'] = true },
     {["Title"] = "Rentrer le vehicule", ["Event"] = "repairman:deleteVeh"},
     {["Title"] = "Sortir crochet", ["Event"] = "repairman:spawnTowtruck"},
+    {["Title"] = "Sortir crochet léger", ["Event"] = "repairman:spawnTowtruck2"},
     {["Title"] = "Sortir plateau", ["Event"] = "repairman:spawnFlatbed"},
     {['Title'] = 'Fermer'}
   }
@@ -110,7 +112,16 @@ local function isNearPoundArea()
   end
 end
 
+local function delVeh()
+  if(existingVeh ~= nil) then
+    SetEntityAsMissionEntity(existingVeh, true, true)
+    Citizen.InvokeNative(0xEA386986E786A54F, Citizen.PointerValueIntInitialized(existingVeh))
+    existingVeh = nil
+  end
+end
+
 local function spawnVehicle(vehicle)
+  delVeh()
   local car = vehicle
   local ply = GetPlayerPed(-1)
 
@@ -548,17 +559,17 @@ RegisterNetEvent("repairman:spawnTowtruck")
 AddEventHandler("repairman:spawnTowtruck", function()
   spawnVehicle(VehicleTowTruck)
 end)
+RegisterNetEvent("repairman:spawnTowtruck2")
+AddEventHandler("repairman:spawnTowtruck2", function()
+  spawnVehicle(VehicleTowTruck2)
+end)
 RegisterNetEvent("repairman:spawnFlatbed")
 AddEventHandler("repairman:spawnFlatbed", function()
   spawnVehicle(VehicleFlatBed)
 end)
 RegisterNetEvent("repairman:deleteVeh")
 AddEventHandler("repairman:deleteVeh", function()
-  if(existingVeh ~= nil) then
-    SetEntityAsMissionEntity(existingVeh, true, true)
-    Citizen.InvokeNative(0xEA386986E786A54F, Citizen.PointerValueIntInitialized(existingVeh))
-    existingVeh = nil
-  end
+  delVeh()
 end)
 
 RegisterNetEvent("playerSpawned")
@@ -641,7 +652,5 @@ Citizen.CreateThread(function()
     if isRepairman and inJob and (currentMission ~= nil) then
       trukHandler()
     end
-
-    
   end
 end)
