@@ -28,7 +28,7 @@ local menuPattern = {
       ['Title'] = 'Trousse à outils',
       ['Items'] = {
         {['Title'] = 'Retour', ['ReturnBtn'] = true },
-        {['Title'] = "Inspecter la voiture", ["EventEvent"] = "repairman:getStatusVehicle"},
+        {['Title'] = "Inspecter la voiture", ["Event"] = "repairman:getStatusVehicle"},
         {['Title'] = "Réparer rapidement", ["Event"] = "repairman:repairVehicle"},
         {['Title'] = "Réparer complétement", ["Event"] = "repairman:fullRepairVehicle"},
         {['Title'] = "Ouvrir/Fermer le capot", ["Event"] = "repairman:toggleCarHood"},
@@ -151,6 +151,7 @@ end
 
 -- Repairman functions --
 function getStatusVehicle()
+  Citizen.Trace("ici")
   if not isRepairman then
     return
   end
@@ -516,7 +517,6 @@ end)
 
 RegisterNetEvent('repairman:missionAlreadyOccuped')
 AddEventHandler('repairman:missionAlreadyOccuped', function ()
-  -- notifIcon("CHAR_BLANK_ENTRY", 1, "Mecano Info", false, "La mission est déjà prise par quelqu'un d'autre")
   DisplayNotification("La mission est déjà prise par quelqu'un d'autre")
 end)
 
