@@ -673,11 +673,5 @@ Citizen.CreateThread(function()
     if isRepairman and inJob and (currentMission ~= nil) then
       trukHandler()
     end
-
-    if IsControlJustPressed(1, Keys["F10"]) then
-      isRepairman = true
-      inJob = true
-    end
-
   end
 end)
