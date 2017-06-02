@@ -13,11 +13,20 @@ local totalMissions = 0
 
 local GaragesCoords = {
   {
-    ['PriseDeService'] = {x = -1148.4748, y = -2000.0338, z = 13.1803},
-    ['RepairArea'] = {x = -1131.28,  y = -2001.58,  z = 13.58, r = 50.0},
-    ['SpawnVehicle'] = {x = -1145.58, y = -1977.95, z = 13.1611},
-    ['PoundArea'] = {x = -1138.07, y = -2034.9, z = 13.2015}
+    ['PriseDeService'] = {x = 474.89, y = -1309.09, z = 29.2066},
+    ['RepairArea'] = {x = 487.114, y = -1323.45, z = 29.2065, r = 50.0},
+    ['SpawnVehicle'] = {x = 483.932, y = -1397.67, z = 29.2801, h = -180.0}
   },
+  {
+    ['PriseDeService'] = {x = 1186.85, y = 2636.41, z = 38.4019},
+    ['RepairArea'] = {x = 1178.76, y = 2642.58, z = 37.7958, r = 50.0},
+    ['SpawnVehicle'] = {x = 1205.8, y = 2639.54, z = 37.8155, h = -40.0}
+  },
+  {
+    ['PriseDeService'] = {x = 99.2933, y = 6620.6, z = 32.4353},
+    ['RepairArea'] = {x = 109.691, y = 6622.45, z = 31.7873, r = 50.0},
+    ['SpawnVehicle'] = {x = 109.585, y = 6606.63, z = 31.8532, h = -50.0}
+  }
 }
 
 local menuPattern = {
@@ -87,6 +96,17 @@ local function isNearSpawnVehicle()
 	end
 end
 
+local function getNearSpawnVehicle()
+  for _, c in pairs(GaragesCoords) do
+		local ply = GetPlayerPed(-1)
+		local plyCoords = GetEntityCoords(ply, 0)
+		local distance = GetDistanceBetweenCoords(c.SpawnVehicle.x, c.SpawnVehicle.y, c.SpawnVehicle.z, plyCoords["x"], plyCoords["y"], plyCoords["z"], true)
+		if(distance < 2) then
+			return c.SpawnVehicle
+		end
+	end
+end
+
 local function isNearRepairArea()
   for _, c in pairs(GaragesCoords) do
 		local ply = GetPlayerPed(-1)
@@ -130,7 +150,8 @@ local function spawnVehicle(vehicle)
     Citizen.Wait(0)
   end
 
-  existingVeh = CreateVehicle(car, -1145.58, -1977.95, 13.1611, -90.0, true, false)
+  local SpawnCoords = getNearSpawnVehicle()
+  existingVeh = CreateVehicle(car, SpawnCoords.x, SpawnCoords.y, SpawnCoords.z, SpawnCoords.h, true, false)
   SetVehicleNumberPlateText(existingVeh, "Depa001")
   local id = NetworkGetNetworkIdFromEntity(existingVeh)
   SetNetworkIdCanMigrate(id, true)
@@ -151,7 +172,6 @@ end
 
 -- Repairman functions --
 function getStatusVehicle()
-  Citizen.Trace("ici")
   if not isRepairman then
     return
   end
@@ -653,5 +673,11 @@ Citizen.CreateThread(function()
     if isRepairman and inJob and (currentMission ~= nil) then
       trukHandler()
     end
+
+    if IsControlJustPressed(1, Keys["F10"]) then
+      isRepairman = true
+      inJob = true
+    end
+
   end
 end)
